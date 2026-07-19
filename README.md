@@ -18,6 +18,19 @@ Application areas:
 
 Version 1 was a single-screen prototype with a “Play Next Level” button. Version 2 keeps Expo SDK 54 and the same reward safeguards, but adds a multi-area journey and a small interactive challenge suitable for rewarded-gaming QA practice.
 
+## Screenshots
+
+Version 2 screen references (also in [`docs/screenshots/`](docs/screenshots/)):
+
+| Screen | Preview |
+| --- | --- |
+| Offers | ![Offers](docs/screenshots/offers.png) |
+| Offer Details | ![Offer Details](docs/screenshots/offer-details.png) |
+| Treasure Quest | ![Treasure Quest](docs/screenshots/treasure-quest.png) |
+| Completion | ![Completion](docs/screenshots/completion.png) |
+| Wallet | ![Wallet](docs/screenshots/wallet.png) |
+| QA Tools | ![QA Tools](docs/screenshots/qa-tools.png) |
+
 ## Run With Expo Go
 
 Requires Expo SDK 54-compatible dependencies (already pinned in `package.json`).
