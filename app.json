@@ -13,6 +13,12 @@
     },
     "android": {
       "package": "com.qunoot.playreward"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "130ef986-ec69-4a64-8a1f-6360359df405"
+      }
+    },
+    "owner": "qunootahmed4"
   }
 }
