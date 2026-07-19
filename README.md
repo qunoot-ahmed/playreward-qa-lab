@@ -1,26 +1,29 @@
 # PlayReward QA Lab
 
-A minimal Expo React Native TypeScript app for testing one rewarded-gaming offer flow on a physical Android phone with Expo Go.
+A minimal Expo React Native TypeScript app for testing a rewarded-gaming offer flow on a physical Android phone with Expo Go.
 
-## Scope
+## Version 2 Scope
 
-The app has one screen and one offer:
+The fictional game is **Treasure Quest**. The offer is:
 
-> Reach Level 5 within 7 days and earn 500 coins.
+> Complete Treasure Quest Level 5 within 7 days and earn 500 coins.
 
-It lets a tester start the offer, play through levels, persist progress locally, grant the reward once when the rules are met, and reset local test data after confirmation.
+Application areas:
+
+1. **Offers** — PlayReward branding, wallet chip, Treasure Quest offer card
+2. **Offer Details** — requirements, status, progress, Start / Continue
+3. **Treasure Quest** — timed treasure-tap levels (1–5)
+4. **Wallet** — coin balance and reward transaction history
+5. **QA Tools** — test-only Reset Test Data and Simulate Offer Expiry
+
+Version 1 was a single-screen prototype with a “Play Next Level” button. Version 2 keeps Expo SDK 54 and the same reward safeguards, but adds a multi-area journey and a small interactive challenge suitable for rewarded-gaming QA practice.
 
 ## Run With Expo Go
 
-Install dependencies first:
+Requires Expo SDK 54-compatible dependencies (already pinned in `package.json`).
 
 ```powershell
 npm install
-```
-
-Start the Expo development server:
-
-```powershell
 npm start
 ```
 
@@ -33,7 +36,7 @@ git clone https://github.com/qunoot-ahmed/playreward-qa-lab.git
 cd playreward-qa-lab
 npm install
 npm run lint
-npx tsc --noEmit
+npm run typecheck
 npx expo start
 ```
 
@@ -46,19 +49,15 @@ npm run typecheck
 
 ## Important Files
 
-- `App.tsx` contains the single React Native screen.
-- `src/rewardRules.ts` contains the offer deadline, level, wallet, and reward-granting rules.
-- `src/storage.ts` saves and loads local progress with AsyncStorage.
-- `docs/` contains the project purpose, business rules, user flow, app notes, manual test scenarios, learning journal, progress notes, and prompt record.
+- `App.tsx` — screen routing shell (no navigation library)
+- `src/rewardRules.ts` — offer lifecycle, deadline, reward idempotency, attempt orchestration
+- `src/gameRules.ts` — level treasure targets, 15s attempt duration, deterministic positions
+- `src/storage.ts` — AsyncStorage load/save plus Version 1 → Version 2 migration
+- `src/screens/` — Offers, Offer Details, Treasure Quest, Completion, Wallet, QA Tools
+- `docs/` — purpose, rules, flow, architecture notes, manual scenarios, journal, progress, prompts
 
 ## TestIDs
 
-Stable test IDs are included for:
+Stable test IDs cover main navigation, offer card/status, View Details, Start Offer, Continue Playing, progress values, current level, treasure target, collected count, remaining time, failure/retry, completion result, wallet balance, reward transactions, and QA Tools actions.
 
-- `Start Offer`
-- `Play Next Level`
-- `Reset Test Data`
-- `Offer status`
-- `Current level`
-- `Wallet balance`
-- `Reward history`
+Native `Alert` confirmation buttons cannot receive React Native `testID` values; the triggering controls are tagged (`reset-test-data`, `simulate-offer-expiry`).

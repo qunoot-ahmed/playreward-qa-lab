@@ -1,43 +1,59 @@
-import { useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Button,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, SafeAreaView, StyleSheet, View } from 'react-native';
 
+import { CompletionScreen } from './src/screens/CompletionScreen';
+import { OfferDetailsScreen } from './src/screens/OfferDetailsScreen';
+import { OffersScreen } from './src/screens/OffersScreen';
+import { QaToolsScreen } from './src/screens/QaToolsScreen';
+import { TreasureQuestScreen } from './src/screens/TreasureQuestScreen';
+import { WalletScreen } from './src/screens/WalletScreen';
 import {
+  collectTreasure,
+  evaluateAttempt,
   evaluateReward,
   initialOfferState,
-  OFFER_TEXT,
-  playNextLevel,
-  startOffer,
-  TARGET_LEVEL,
   OfferState,
+  retryLevelAttempt,
+  simulateOfferExpiry,
+  startLevelAttempt,
+  startOffer,
 } from './src/rewardRules';
 import { clearOfferState, loadOfferState, saveOfferState } from './src/storage';
+import { colors } from './src/theme';
 
-const statusLabels: Record<OfferState['status'], string> = {
-  not_started: 'Not started',
-  active: 'Active',
-  rewarded: 'Reward granted',
-  expired: 'Expired',
-};
+type ScreenName = 'offers' | 'details' | 'game' | 'completion' | 'wallet' | 'qaTools';
+
+function sameAttemptSlice(a: OfferState, b: OfferState): boolean {
+  return (
+    a.status === b.status &&
+    a.currentLevel === b.currentLevel &&
+    a.completedLevels === b.completedLevels &&
+    a.attemptCollected === b.attemptCollected &&
+    a.attemptStartTime === b.attemptStartTime &&
+    a.attemptEndTime === b.attemptEndTime &&
+    a.attemptFailed === b.attemptFailed &&
+    a.walletBalance === b.walletBalance &&
+    a.rewardGranted === b.rewardGranted &&
+    a.offerStartTime === b.offerStartTime
+  );
+}
 
 export default function App() {
+  const [screen, setScreen] = useState<ScreenName>('offers');
   const [offerState, setOfferState] = useState<OfferState>(initialOfferState);
+  const [now, setNow] = useState(() => new Date());
   const [isLoading, setIsLoading] = useState(true);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const previousStatusRef = useRef<OfferState['status']>('not_started');
 
   useEffect(() => {
     async function restoreState() {
       try {
         const savedState = await loadOfferState();
-        setOfferState(evaluateReward(savedState, new Date()));
+        const evaluated = evaluateReward(savedState, new Date());
+        previousStatusRef.current = evaluated.status;
+        setOfferState(evaluated);
+        setNow(new Date());
       } catch {
         Alert.alert('Storage Error', 'Saved test data could not be loaded.');
       } finally {
@@ -59,166 +75,141 @@ export default function App() {
     });
   }, [hasLoaded, offerState]);
 
-  const rewardHistoryText = useMemo(() => {
-    if (offerState.rewardHistory.length === 0) {
-      return 'No rewards granted yet.';
+  useEffect(() => {
+    const wasActive = previousStatusRef.current === 'active';
+    if (wasActive && offerState.status === 'rewarded' && screen === 'game') {
+      setScreen('completion');
     }
+    previousStatusRef.current = offerState.status;
+  }, [offerState.status, screen]);
 
-    return offerState.rewardHistory
-      .map((reward) => `${reward.coins} coins granted for "${reward.offerText}"`)
-      .join('\n');
-  }, [offerState.rewardHistory]);
+  const updateState = useCallback((updater: (current: OfferState) => OfferState) => {
+    setOfferState((current) => {
+      const next = updater(current);
+      return sameAttemptSlice(current, next) && current.rewardHistory === next.rewardHistory
+        ? current
+        : next;
+    });
+    setNow(new Date());
+  }, []);
 
-  function handleStartOffer() {
-    setOfferState((currentState) => startOffer(currentState, new Date()));
-  }
+  const handleStartOffer = useCallback(() => {
+    updateState((current) => startOffer(current, new Date()));
+  }, [updateState]);
 
-  function handlePlayNextLevel() {
-    setOfferState((currentState) => playNextLevel(currentState, new Date()));
-  }
+  const handleEnsureAttempt = useCallback(() => {
+    updateState((current) => startLevelAttempt(current, new Date()));
+  }, [updateState]);
 
-  function handleResetTestData() {
-    Alert.alert(
-      'Reset Test Data',
-      'This clears local offer progress, wallet balance, and reward history.',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: async () => {
-            await clearOfferState();
-            setOfferState(initialOfferState);
-          },
-        },
-      ],
-    );
-  }
+  const handleCollectTreasure = useCallback(
+    (treasureId: string) => {
+      updateState((current) => collectTreasure(current, new Date(), treasureId));
+    },
+    [updateState],
+  );
+
+  const handleRetryLevel = useCallback(() => {
+    updateState((current) => retryLevelAttempt(current, new Date()));
+  }, [updateState]);
+
+  const handleTick = useCallback(() => {
+    updateState((current) => evaluateAttempt(evaluateReward(current, new Date()), new Date()));
+  }, [updateState]);
+
+  const handleResetTestData = useCallback(async () => {
+    await clearOfferState();
+    previousStatusRef.current = 'not_started';
+    setOfferState(initialOfferState);
+    setNow(new Date());
+    setScreen('offers');
+  }, []);
+
+  const handleSimulateOfferExpiry = useCallback(() => {
+    updateState((current) => simulateOfferExpiry(current, new Date()));
+  }, [updateState]);
 
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator />
+        <View style={styles.loading}>
+          <ActivityIndicator color={colors.brand} size="large" />
+        </View>
       </SafeAreaView>
     );
   }
 
-  const canStartOffer = offerState.status === 'not_started';
-  const canPlayNextLevel =
-    offerState.status === 'active' && offerState.currentLevel < TARGET_LEVEL;
-
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Rewarded Gaming QA Lab</Text>
+      {screen === 'offers' ? (
+        <OffersScreen
+          offerState={offerState}
+          onViewDetails={() => setScreen('details')}
+          onOpenWallet={() => setScreen('wallet')}
+          onOpenQaTools={() => setScreen('qaTools')}
+        />
+      ) : null}
 
-        <View style={styles.card}>
-          <Text style={styles.label}>Offer</Text>
-          <Text style={styles.offerText}>{OFFER_TEXT}</Text>
-        </View>
+      {screen === 'details' ? (
+        <OfferDetailsScreen
+          offerState={offerState}
+          now={now}
+          onBack={() => setScreen('offers')}
+          onStartOffer={handleStartOffer}
+          onContinuePlaying={() => setScreen('game')}
+          onOpenWallet={() => setScreen('wallet')}
+        />
+      ) : null}
 
-        <View style={styles.card}>
-          <Text style={styles.label}>Status</Text>
-          <Text testID="Offer status" style={styles.statusText}>
-            {statusLabels[offerState.status]}
-          </Text>
+      {screen === 'game' ? (
+        <TreasureQuestScreen
+          offerState={offerState}
+          now={now}
+          onBack={() => setScreen('details')}
+          onEnsureAttempt={handleEnsureAttempt}
+          onCollectTreasure={handleCollectTreasure}
+          onRetryLevel={handleRetryLevel}
+          onTick={handleTick}
+        />
+      ) : null}
 
-          <Text style={styles.label}>Current level</Text>
-          <Text testID="Current level" style={styles.valueText}>
-            Level {offerState.currentLevel}
-          </Text>
+      {screen === 'completion' ? (
+        <CompletionScreen
+          offerState={offerState}
+          onBackToOffers={() => setScreen('offers')}
+          onViewWallet={() => setScreen('wallet')}
+        />
+      ) : null}
 
-          <Text style={styles.label}>Wallet balance</Text>
-          <Text testID="Wallet balance" style={styles.valueText}>
-            {offerState.walletBalance} coins
-          </Text>
-        </View>
+      {screen === 'wallet' ? (
+        <WalletScreen
+          offerState={offerState}
+          onBack={() => setScreen('offers')}
+          onOpenOffers={() => setScreen('offers')}
+          onOpenQaTools={() => setScreen('qaTools')}
+        />
+      ) : null}
 
-        <View style={styles.actions}>
-          <Button
-            testID="Start Offer"
-            title="Start Offer"
-            onPress={handleStartOffer}
-            disabled={!canStartOffer}
-          />
-          <Button
-            testID="Play Next Level"
-            title="Play Next Level"
-            onPress={handlePlayNextLevel}
-            disabled={!canPlayNextLevel}
-          />
-          <Button
-            testID="Reset Test Data"
-            title="Reset Test Data"
-            onPress={handleResetTestData}
-            color="#b42318"
-          />
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.label}>Reward history</Text>
-          <Text testID="Reward history" style={styles.historyText}>
-            {rewardHistoryText}
-          </Text>
-        </View>
-      </ScrollView>
+      {screen === 'qaTools' ? (
+        <QaToolsScreen
+          onBack={() => setScreen('offers')}
+          onOpenOffers={() => setScreen('offers')}
+          onOpenWallet={() => setScreen('wallet')}
+          onResetTestData={handleResetTestData}
+          onSimulateOfferExpiry={handleSimulateOfferExpiry}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: colors.background,
     flex: 1,
-    backgroundColor: '#f4f6f8',
   },
-  content: {
-    padding: 24,
-    gap: 16,
-  },
-  title: {
-    color: '#101828',
-    fontSize: 26,
-    fontWeight: '700',
-  },
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    gap: 8,
-    padding: 16,
-  },
-  label: {
-    color: '#667085',
-    fontSize: 14,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-  },
-  offerText: {
-    color: '#101828',
-    fontSize: 20,
-    fontWeight: '600',
-    lineHeight: 28,
-  },
-  statusText: {
-    color: '#175cd3',
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  valueText: {
-    color: '#101828',
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  actions: {
-    gap: 12,
-  },
-  historyText: {
-    color: '#344054',
-    fontSize: 16,
-    lineHeight: 24,
+  loading: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
   },
 });
