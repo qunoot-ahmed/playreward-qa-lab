@@ -53,6 +53,20 @@ npm run typecheck
 npx expo start
 ```
 
+## Mobile Automation
+
+A minimal Maestro suite covers four critical rewarded-gaming journeys (happy path, failure/retry, expiry protection, persistence/duplicate reward).
+
+- Details, APK/EAS steps, and run commands: [`maestro/README.md`](maestro/README.md)
+- Android application ID: `com.qunoot.playreward`
+- Target: standalone EAS APK (not Expo Go)
+
+```powershell
+maestro test maestro/flows/
+```
+
+Do not treat automation as verified until those flows have been executed against an installed APK.
+
 ## Validation Commands
 
 ```powershell
@@ -67,10 +81,10 @@ npm run typecheck
 - `src/gameRules.ts` — level treasure targets, 15s attempt duration, deterministic positions
 - `src/storage.ts` — AsyncStorage load/save plus Version 1 → Version 2 migration
 - `src/screens/` — Offers, Offer Details, Treasure Quest, Completion, Wallet, QA Tools
+- `maestro/` — Maestro flows and subflows for critical journeys
+- `eas.json` — EAS preview profile that produces an Android APK
 - `docs/` — purpose, rules, flow, architecture notes, manual scenarios, journal, progress, prompts
 
 ## TestIDs
 
-Stable test IDs cover main navigation, offer card/status, View Details, Start Offer, Continue Playing, progress values, current level, treasure target, collected count, remaining time, failure/retry, completion result, wallet balance, reward transactions, and QA Tools actions.
-
-Native `Alert` confirmation buttons cannot receive React Native `testID` values; the triggering controls are tagged (`reset-test-data`, `simulate-offer-expiry`).
+Stable test IDs cover main navigation, offer card/status, View Details, Start Offer, Continue Playing, progress values, current level, treasure target, collected count, remaining time, failure/retry, completion result, wallet balance, reward transaction rows, `reward-transaction-count`, QA Tools actions, and in-app confirm/cancel controls for reset and simulate expiry.

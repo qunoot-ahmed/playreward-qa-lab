@@ -1,0 +1,36 @@
+appId: com.qunoot.playreward
+---
+- launchApp
+- runFlow: ../subflows/reset-test-data.yaml
+
+# Open Treasure Quest and start the offer
+- tapOn:
+    id: view-details
+- tapOn:
+    id: start-offer
+- tapOn:
+    id: continue-playing
+
+- runFlow: ../subflows/complete-treasure-quest.yaml
+
+# Completion result and exact reward
+- assertVisible:
+    id: completion-result
+- assertVisible:
+    id: wallet-balance
+    text: 500 coins
+
+- tapOn:
+    id: view-wallet
+- assertVisible:
+    id: wallet-balance
+    text: 500 coins
+- assertVisible:
+    id: reward-transaction-count
+    text: "Transactions: 1"
+- assertVisible:
+    id: reward-transaction
+- assertVisible:
+    text: Treasure Quest
+- assertVisible:
+    text: Status: granted

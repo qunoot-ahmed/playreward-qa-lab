@@ -1,0 +1,60 @@
+appId: com.qunoot.playreward
+---
+- launchApp
+- runFlow: ../subflows/reset-test-data.yaml
+
+- tapOn:
+    id: view-details
+- tapOn:
+    id: start-offer
+- tapOn:
+    id: continue-playing
+
+# Let Level 1 timer expire without collecting treasure
+- extendedWaitUntil:
+    visible:
+      id: level-failed-message
+    timeout: 20000
+
+- assertVisible:
+    id: level-failed-message
+- assertVisible:
+    text: Level failed
+
+- tapOn:
+    id: nav-back-game
+- assertVisible:
+    id: offer-progress-value
+    text: 0/5
+- tapOn:
+    id: nav-back-details
+- tapOn:
+    id: nav-wallet
+- assertVisible:
+    id: wallet-balance
+    text: 0 coins
+- assertVisible:
+    id: reward-transaction-count
+    text: "Transactions: 0"
+
+# Retry and complete Level 1
+- tapOn:
+    id: nav-offers
+- tapOn:
+    id: view-details
+- tapOn:
+    id: continue-playing
+- tapOn:
+    id: retry-level
+- extendedWaitUntil:
+    visible:
+      id: treasure-target
+    timeout: 5000
+- tapOn:
+    id: treasure-target
+
+- tapOn:
+    id: nav-back-game
+- assertVisible:
+    id: offer-progress-value
+    text: 1/5

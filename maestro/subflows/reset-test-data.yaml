@@ -1,0 +1,16 @@
+appId: com.qunoot.playreward
+---
+# Shared setup: clear local offer/wallet state before an independent flow.
+- tapOn:
+    id: nav-qa-tools
+- tapOn:
+    id: reset-test-data
+- tapOn:
+    id: confirm-reset-test-data
+- tapOn:
+    id: nav-offers
+- assertVisible:
+    id: offer-status
+    text: Not started
+- assertVisible:
+    text: 0 coins

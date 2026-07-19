@@ -35,6 +35,9 @@ export function WalletScreen({
       </View>
 
       <Text style={styles.sectionTitle}>Reward transaction history</Text>
+      <Text testID="reward-transaction-count" style={styles.transactionCount}>
+        Transactions: {offerState.rewardHistory.length}
+      </Text>
 
       {offerState.rewardHistory.length === 0 ? (
         <View testID="reward-history-empty" style={styles.card}>
@@ -89,6 +92,11 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 18,
     fontWeight: '800',
+  },
+  transactionCount: {
+    color: colors.textMuted,
+    fontSize: 15,
+    fontWeight: '700',
   },
   card: {
     backgroundColor: colors.surface,

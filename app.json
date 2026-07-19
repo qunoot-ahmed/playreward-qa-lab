@@ -12,7 +12,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.playrewardqalab.app"
+      "package": "com.qunoot.playreward"
     }
   }
 }

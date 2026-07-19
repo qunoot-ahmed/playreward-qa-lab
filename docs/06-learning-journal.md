@@ -40,4 +40,8 @@ Version 2 was manually verified on a physical Android device through Expo Go.
 
 ## Notes
 
-The app intentionally avoids backends, ads SDKs, auth, payments, automation frameworks, analytics, and performance tooling so the learning focus stays on mobile QA of offer rules, persistence, and interactive progress.
+The app intentionally avoids backends, ads SDKs, auth, payments, automation frameworks beyond a minimal Maestro suite, analytics, and performance tooling so the learning focus stays on mobile QA of offer rules, persistence, and interactive progress.
+
+## Maestro automation notes
+
+A minimal Maestro suite was added for four critical journeys. The permanent Android package ID is `com.qunoot.playreward`. QA confirmations use in-app panels (not system alerts) so Maestro can tap stable testIDs. Automation is not claimed passed until the owner builds the EAS APK and runs the flows.

@@ -1,0 +1,42 @@
+appId: com.qunoot.playreward
+---
+- launchApp
+- runFlow: ../subflows/reset-test-data.yaml
+
+- tapOn:
+    id: view-details
+- tapOn:
+    id: start-offer
+- tapOn:
+    id: nav-back-details
+
+# Force expiry through QA Tools (test-only start-time rewrite + normal rules)
+- tapOn:
+    id: nav-qa-tools
+- tapOn:
+    id: simulate-offer-expiry
+- tapOn:
+    id: confirm-simulate-offer-expiry
+
+- tapOn:
+    id: nav-offers
+- tapOn:
+    id: view-details
+- assertVisible:
+    id: offer-status
+    text: Expired
+- assertVisible:
+    id: expiration-reason
+- assertNotVisible:
+    id: continue-playing
+
+- tapOn:
+    id: nav-back-details
+- tapOn:
+    id: nav-wallet
+- assertVisible:
+    id: wallet-balance
+    text: 0 coins
+- assertVisible:
+    id: reward-transaction-count
+    text: "Transactions: 0"

@@ -80,9 +80,12 @@ Backgrounding does not pause or extend the attempt. Remaining time is derived fr
 
 ## QA Tools (test-only)
 
-- **Reset Test Data** — confirmed clear of local state.
-- **Simulate Offer Expiry** — rewrites `offerStartTime` to slightly more than seven days in the past, then runs normal `evaluateReward` / deadline logic. Does not bypass business rules.
+- **Reset Test Data** — in-app confirmation panel (confirm/cancel) then clear of local state.
+- **Simulate Offer Expiry** — in-app confirmation panel, then rewrites `offerStartTime` to slightly more than seven days in the past and runs normal `evaluateReward` / deadline logic. Does not bypass business rules.
 
+## Android application ID
+
+Permanent package: `com.qunoot.playreward` (configured in `app.json`). This ID is required for standalone APK installs and Maestro automation.
 ## Local data
 
 AsyncStorage persists offer status, levels, attempt fields, wallet balance, reward flag, and history. Version 1 saves are migrated with defaults for new fields; wallet balance and reward status are preserved when valid.

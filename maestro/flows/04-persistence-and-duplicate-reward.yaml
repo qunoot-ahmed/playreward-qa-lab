@@ -1,0 +1,64 @@
+appId: com.qunoot.playreward
+---
+- launchApp
+- runFlow: ../subflows/reset-test-data.yaml
+
+- tapOn:
+    id: view-details
+- tapOn:
+    id: start-offer
+- tapOn:
+    id: continue-playing
+
+- runFlow: ../subflows/complete-treasure-quest.yaml
+
+- assertVisible:
+    id: completion-result
+- assertVisible:
+    id: wallet-balance
+    text: 500 coins
+- tapOn:
+    id: view-wallet
+- assertVisible:
+    id: reward-transaction-count
+    text: "Transactions: 1"
+
+# Preserve AsyncStorage; do not clear app state on relaunch
+- stopApp
+- launchApp:
+    clearState: false
+
+- assertVisible:
+    id: offer-status
+    text: Completed
+- assertVisible:
+    id: offer-progress-value
+    text: 5/5
+- assertVisible:
+    text: 500 coins
+
+- tapOn:
+    id: nav-wallet
+- assertVisible:
+    id: wallet-balance
+    text: 500 coins
+- assertVisible:
+    id: reward-transaction-count
+    text: "Transactions: 1"
+- assertVisible:
+    id: reward-transaction
+
+- tapOn:
+    id: nav-offers
+- tapOn:
+    id: view-details
+- assertVisible:
+    id: offer-status
+    text: Completed
+- assertVisible:
+    id: offer-progress-value
+    text: 5/5
+- assertNotVisible:
+    id: start-offer
+- assertNotVisible:
+    id: continue-playing

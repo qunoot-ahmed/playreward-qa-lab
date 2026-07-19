@@ -1,7 +1,10 @@
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AppButton, ScreenHeader } from '../components/ui';
 import { colors, radii, spacing } from '../theme';
+
+type ConfirmKind = 'reset' | 'expiry' | null;
 
 type QaToolsScreenProps = {
   onBack: () => void;
@@ -18,36 +21,18 @@ export function QaToolsScreen({
   onResetTestData,
   onSimulateOfferExpiry,
 }: QaToolsScreenProps) {
-  function confirmReset() {
-    Alert.alert(
-      'Reset Test Data',
-      'This clears local offer progress, wallet balance, and reward history.',
-      [
-        { text: 'Cancel', style: 'cancel', onPress: () => undefined },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: onResetTestData,
-        },
-      ],
-      { cancelable: true },
-    );
-  }
+  const [confirmKind, setConfirmKind] = useState<ConfirmKind>(null);
 
-  function confirmSimulateExpiry() {
-    Alert.alert(
-      'Simulate Offer Expiry',
-      'TEST ONLY: moves the offer start timestamp slightly more than seven days into the past, then evaluates expiry through normal business rules.',
-      [
-        { text: 'Cancel', style: 'cancel', onPress: () => undefined },
-        {
-          text: 'Simulate Expiry',
-          style: 'destructive',
-          onPress: onSimulateOfferExpiry,
-        },
-      ],
-      { cancelable: true },
-    );
+  function handleConfirm() {
+    if (confirmKind === 'reset') {
+      onResetTestData();
+    }
+
+    if (confirmKind === 'expiry') {
+      onSimulateOfferExpiry();
+    }
+
+    setConfirmKind(null);
   }
 
   return (
@@ -74,6 +59,58 @@ export function QaToolsScreen({
         </Text>
       </View>
 
+      {confirmKind === 'reset' ? (
+        <View
+          testID="confirm-reset-panel"
+          accessibilityRole="alert"
+          style={styles.confirmPanel}
+        >
+          <Text style={styles.confirmTitle}>Confirm reset</Text>
+          <Text style={styles.confirmBody}>
+            This clears local offer progress, wallet balance, and reward history. This cannot be
+            undone.
+          </Text>
+          <AppButton
+            testID="confirm-reset-test-data"
+            title="Confirm Reset"
+            variant="danger"
+            onPress={handleConfirm}
+          />
+          <AppButton
+            testID="cancel-reset-test-data"
+            title="Cancel"
+            variant="ghost"
+            onPress={() => setConfirmKind(null)}
+          />
+        </View>
+      ) : null}
+
+      {confirmKind === 'expiry' ? (
+        <View
+          testID="confirm-expiry-panel"
+          accessibilityRole="alert"
+          style={styles.confirmPanel}
+        >
+          <Text style={styles.confirmTitle}>Confirm simulate expiry</Text>
+          <Text style={styles.confirmBody}>
+            TEST ONLY: moves the offer start timestamp slightly more than seven days into the
+            past, then evaluates expiry through normal business rules.
+          </Text>
+          <AppButton
+            testID="confirm-simulate-offer-expiry"
+            title="Confirm Simulate Expiry"
+            variant="danger"
+            onPress={handleConfirm}
+          />
+          <AppButton
+            testID="cancel-simulate-offer-expiry"
+            title="Cancel"
+            variant="ghost"
+            onPress={() => setConfirmKind(null)}
+          />
+        </View>
+      ) : null}
+
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Reset Test Data</Text>
         <Text style={styles.cardBody}>
@@ -84,7 +121,8 @@ export function QaToolsScreen({
           testID="reset-test-data"
           title="Reset Test Data"
           variant="danger"
-          onPress={confirmReset}
+          onPress={() => setConfirmKind('reset')}
+          disabled={confirmKind !== null}
         />
       </View>
 
@@ -98,7 +136,8 @@ export function QaToolsScreen({
           testID="simulate-offer-expiry"
           title="Simulate Offer Expiry"
           variant="danger"
-          onPress={confirmSimulateExpiry}
+          onPress={() => setConfirmKind('expiry')}
+          disabled={confirmKind !== null}
         />
       </View>
     </ScrollView>
@@ -127,6 +166,22 @@ const styles = StyleSheet.create({
   },
   bannerBody: {
     color: '#fde68a',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  confirmPanel: {
+    backgroundColor: '#7f1d1d',
+    borderRadius: radii.lg,
+    gap: spacing.md,
+    padding: spacing.md,
+  },
+  confirmTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  confirmBody: {
+    color: '#fecaca',
     fontSize: 14,
     lineHeight: 20,
   },

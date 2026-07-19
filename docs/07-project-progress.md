@@ -28,9 +28,18 @@
 - Expo SDK runtime pins unchanged: `expo@54.0.36`, `react@19.1.0`, `react-native@0.81.5`.
 - Version 2 was manually verified on a physical Android device through Expo Go.
 
+## Maestro automation suite (implemented; APK execution pending owner)
+
+- Android package ID set permanently to `com.qunoot.playreward` (was `com.playrewardqalab.app`).
+- QA Tools confirmations converted to in-app panels with stable confirm/cancel testIDs.
+- Wallet shows `Transactions: N` via `reward-transaction-count` derived from `rewardHistory.length`.
+- Added `eas.json` preview profile for Android APK cloud builds.
+- Added four Maestro flows and two subflows (`reset-test-data`, `complete-treasure-quest`).
+- Prompt record: `docs/prompts/003-maestro-critical-journeys.md`.
+- Maestro execution against a standalone APK: **pending owner** (not claimed here).
+
 ## Known limitations
 
-- Native Alert confirm actions cannot carry `testID`s.
 - Treasure visuals are simple emoji/shapes, not polished game art.
-- No automated UI tests yet; scenarios are manual.
 - Offer clock and attempt clock use device time unless callers inject `Date` into rule functions.
+- Maestro flows are authored but not claimed passed until run on the EAS APK.
