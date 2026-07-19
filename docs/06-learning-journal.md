@@ -16,6 +16,23 @@ The app intentionally avoids services and platform-specific native work. That ke
 
 Application implementation is complete.
 
-Dependencies were not installed in this environment. Linting and TypeScript validation are pending. Expo startup and physical-device testing are pending.
+The project was moved to another laptop and run on a physical Android phone with Expo Go.
 
-Verification will be performed after cloning on another laptop.
+### Expo Go / SDK compatibility
+
+On the previous laptop, the project resolved to Expo SDK 57 because `package.json` used `"expo": "latest"` (and related `"latest"` dependency ranges). That SDK was incompatible with the Expo Go version installed on the physical Android device, so the app could not open there.
+
+### Migration to Expo SDK 54
+
+Dependencies were aligned manually in VS Code to Expo SDK 54 and compatible package versions (pinned ranges instead of `latest`). Current declared versions in `package.json`:
+
+- `expo`: `~54.0.0`
+- `react`: `19.1.0`
+- `react-native`: `0.81.5`
+- `@react-native-async-storage/async-storage`: `2.2.0`
+
+Resolved installed versions (from `package-lock.json` / `npm list`): `expo@54.0.36`, `react@19.1.0`, `react-native@0.81.5`.
+
+### Android verification
+
+After the SDK 54 alignment, the application opens successfully on the physical Android phone through Expo Go.

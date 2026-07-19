@@ -29,7 +29,7 @@ Then open Expo Go on a physical Android phone and scan the QR code shown by Expo
 ## Continue on another laptop
 
 ```powershell
-git clone <repository-url>
+git clone https://github.com/qunoot-ahmed/playreward-qa-lab.git
 cd playreward-qa-lab
 npm install
 npm run lint
