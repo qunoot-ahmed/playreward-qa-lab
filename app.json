@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "PlayReward QA Lab",
+    "slug": "playreward-qa-lab",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.playrewardqalab.app"
+    }
+  }
+}
